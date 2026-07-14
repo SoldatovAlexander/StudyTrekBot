@@ -1,4 +1,20 @@
-# Персональный трек обучения по пакетам курсов
+# StudyTrekBot
+
+Telegram/FastAPI bot for generating personalized learning tracks from Google Sheets course catalogs with LLM support.
+
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![Backend](https://img.shields.io/badge/backend-FastAPI%20%7C%20aiogram-orange)
+![LLM](https://img.shields.io/badge/LLM-OpenRouter-green)
+![Catalog](https://img.shields.io/badge/catalog-Google%20Sheets-red)
+
+
+## Features
+- Telegram bot interface for natural learner diagnostics.
+- FastAPI backend with health checks and admin catalog sync endpoints.
+- LLM-based profile extraction and track generation through OpenRouter.
+- Google Sheets catalog synchronization with nightly auto-sync support.
+- Hybrid fallback logic for course matching and deterministic track building.
+- SQLite storage for MVP user profiles and generated tracks.
 
 ## 1. Формулировка проблемы
 
