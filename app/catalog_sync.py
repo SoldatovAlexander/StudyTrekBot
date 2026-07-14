@@ -57,7 +57,7 @@ class CatalogSyncScheduler:
         try:
             payload = await asyncio.to_thread(
                 sync_catalog,
-                self.settings.google_sheets_spreadsheet_id,
+                self.settings.catalog_spreadsheet_id,
                 Path(self.settings.catalog_seed_path),
             )
         except Exception as exc:
@@ -102,4 +102,3 @@ def parse_hhmm(value: str) -> time:
         return time(hour=int(hour), minute=int(minute))
     except Exception as exc:
         raise ValueError("catalog_auto_sync_time must use HH:MM format") from exc
-

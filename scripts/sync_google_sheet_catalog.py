@@ -12,33 +12,39 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
-DEFAULT_SPREADSHEET_ID = "1Ur-UDG6lvvxW3X7VORZ6KqPmBqRkdM0qLxVmdjxzkYU"
+from app.config import Settings, extract_google_spreadsheet_id
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Sync course catalog from public Google Sheets CSV exports.")
-    parser.add_argument("--spreadsheet-id", default=DEFAULT_SPREADSHEET_ID)
-    parser.add_argument("--output", default="data/catalog_seed.json")
+    parser.add_argument("--spreadsheet-id", default=None, help="Google Sheets spreadsheet ID or full URL.")
+    parser.add_argument("--output", default=None)
     parser.add_argument("--limit", type=int, default=None, help="Limit number of sheets for debugging.")
     args = parser.parse_args()
 
-    payload = sync_catalog(args.spreadsheet_id, Path(args.output), limit=args.limit, verbose=True)
+    settings = Settings()
+    spreadsheet_source = args.spreadsheet_id or settings.google_sheets_spreadsheet_url or settings.google_sheets_spreadsheet_id
+    if not spreadsheet_source:
+        parser.error("Set GOOGLE_SHEETS_SPREADSHEET_URL in .env or pass --spreadsheet-id.")
+
+    output = Path(args.output) if args.output else Path(settings.catalog_seed_path)
+    payload = sync_catalog(extract_google_spreadsheet_id(spreadsheet_source), output, limit=args.limit, verbose=True)
     print(
         f"Synced {payload['source']['lesson_count']} lessons from "
-        f"{payload['source']['sheet_count']} sheets into {args.output}"
+        f"{payload['source']['sheet_count']} sheets into {output}"
     )
 
 
 def sync_catalog(
-    spreadsheet_id: str = DEFAULT_SPREADSHEET_ID,
+    spreadsheet_id: str,
     output_path: Path | str = Path("data/catalog_seed.json"),
     *,
     limit: int | None = None,
     verbose: bool = False,
 ) -> dict[str, Any]:
+    spreadsheet_id = extract_google_spreadsheet_id(spreadsheet_id)
     sheet_titles = fetch_sheet_titles(spreadsheet_id)
-    if limit:
+    if limit is not None:
         sheet_titles = sheet_titles[:limit]
 
     lessons = []

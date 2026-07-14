@@ -175,14 +175,16 @@ curl http://127.0.0.1:8000/health
 Синхронизировать каталог из Google Sheets:
 
 ```bash
+GOOGLE_SHEETS_SPREADSHEET_URL=https://docs.google.com/spreadsheets/d/.../edit
 python3 scripts/sync_google_sheet_catalog.py --output data/catalog_seed.json
 ```
 
-Скрипт читает таблицу `Программы курсов со ссылками`, проходит по вкладкам-курсам, вытаскивает строки уроков и обновляет локальный нормализованный каталог. После синхронизации `/health` показывает количество активных материалов и курсов, которые видит бот.
+Скрипт берет адрес таблицы из `GOOGLE_SHEETS_SPREADSHEET_URL` в `.env`, проходит по вкладкам-курсам, вытаскивает строки уроков и обновляет локальный нормализованный каталог. Для разовой отладки можно переопределить источник через `--spreadsheet-id`. После синхронизации `/health` показывает количество активных материалов и курсов, которые видит бот.
 
 Автоматическая синхронизация включается переменными окружения:
 
 ```bash
+GOOGLE_SHEETS_SPREADSHEET_URL=https://docs.google.com/spreadsheets/d/.../edit
 CATALOG_AUTO_SYNC_ENABLED=true
 CATALOG_AUTO_SYNC_TIME=03:00
 CATALOG_AUTO_SYNC_TIMEZONE=Europe/Moscow

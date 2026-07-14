@@ -5,6 +5,16 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def extract_google_spreadsheet_id(value: str) -> str:
+    spreadsheet = value.strip()
+    if not spreadsheet:
+        raise ValueError("Google Sheets spreadsheet URL or ID is empty.")
+    marker = "/spreadsheets/d/"
+    if marker not in spreadsheet:
+        return spreadsheet
+    return spreadsheet.split(marker, 1)[1].split("/", 1)[0].strip()
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
@@ -17,7 +27,8 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite:///./data/app.db"
     catalog_seed_path: Path = Field(default=Path("./data/catalog_seed.json"))
-    google_sheets_spreadsheet_id: str = "1Ur-UDG6lvvxW3X7VORZ6KqPmBqRkdM0qLxVmdjxzkYU"
+    google_sheets_spreadsheet_url: str | None = None
+    google_sheets_spreadsheet_id: str | None = None
     catalog_auto_sync_enabled: bool = False
     catalog_auto_sync_time: str = "03:00"
     catalog_auto_sync_timezone: str = "Europe/Moscow"
@@ -28,6 +39,13 @@ class Settings(BaseSettings):
         if not self.database_url.startswith(prefix):
             raise ValueError("Only sqlite:/// DATABASE_URL is supported in the MVP.")
         return Path(self.database_url.removeprefix(prefix))
+
+    @property
+    def catalog_spreadsheet_id(self) -> str:
+        spreadsheet = self.google_sheets_spreadsheet_url or self.google_sheets_spreadsheet_id
+        if not spreadsheet:
+            raise ValueError("Set GOOGLE_SHEETS_SPREADSHEET_URL in .env before syncing the catalog.")
+        return extract_google_spreadsheet_id(spreadsheet)
 
 
 @lru_cache
